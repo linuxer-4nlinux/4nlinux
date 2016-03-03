@@ -102,7 +102,7 @@
  * Protected counters by write_lock_irq(&tasklist_lock)
  */
 unsigned long total_forks;	/* Handle normal Linux uptimes. */
-int nr_threads;			/* The idle threads do not count.. */
+int nr_threads;			/**< The idle threads do not count.. */
 
 int max_threads;		/* tunable limit on nr_threads */
 

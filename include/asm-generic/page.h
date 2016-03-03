@@ -10,9 +10,8 @@
 #endif
 
 
-/* PAGE_SHIFT determines the page size */
 
-#define PAGE_SHIFT	12
+#define PAGE_SHIFT	12	/**< PAGE_SHIFT determines the page size */
 #ifdef __ASSEMBLY__
 #define PAGE_SIZE	(1 << PAGE_SHIFT)
 #else
@@ -34,23 +33,38 @@
 #define copy_user_page(to, from, vaddr, pg)	copy_page(to, from)
 
 /**
- * @biref Page Table entry descriptor
+ * Page Table entry descriptor
  */
 typedef struct {
 	unsigned long pte;	/**< Page Table entry value */
 } pte_t;
 
+/**
+ * Page Middle Table entry
+ */
 typedef struct {
-	unsigned long pmd[16];
+	unsigned long pmd[16];	/**< ????? */
 } pmd_t;
+
+/**
+ * Page Global Directory
+ */
 typedef struct {
-	unsigned long pgd;
+	unsigned long pgd;	/**< pgd value */
 } pgd_t;
+
+/**
+ * Page Protect
+ */
 typedef struct {
-	unsigned long pgprot;
+	unsigned long pgprot;	/**< protect value */
 } pgprot_t;
+
 typedef struct page *pgtable_t;
 
+/**
+ * Get page table entry's value
+ */
 #define pte_val(x)	((x).pte)
 #define pmd_val(x)	((&x)->pmd[0])
 #define pgd_val(x)	((x).pgd)
@@ -78,7 +92,7 @@ extern unsigned long memory_end;
 
 #ifndef __ASSEMBLY__
 
-#define __va(x) ((void *)((unsigned long) (x)))
+#define __va(x) ((void *)((unsigned long) (x)))	/**< Get the virtual address of x */
 #define __pa(x) ((unsigned long) (x))
 
 #define virt_to_pfn(kaddr)	(__pa(kaddr) >> PAGE_SHIFT)
