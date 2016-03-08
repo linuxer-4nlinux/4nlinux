@@ -1,3 +1,7 @@
+/**
+ * @file mm_zone.h Definition of structs on the mmzone
+ * Memory node and zone definition.
+ */
 #ifndef _LINUX_MMZONE_H
 #define _LINUX_MMZONE_H
 
@@ -21,6 +25,7 @@
 
 /* Free memory management - zoned buddy allocator.  */
 #ifndef CONFIG_FORCE_MAX_ZONEORDER
+/** Buddy allocator max order */
 #define MAX_ORDER 11
 #else
 #define MAX_ORDER CONFIG_FORCE_MAX_ZONEORDER
@@ -273,7 +278,7 @@ struct per_cpu_pageset {
 
 enum zone_type {
 #ifdef CONFIG_ZONE_DMA
-	/*
+	/**
 	 * ZONE_DMA is used when there are devices that are not able
 	 * to do DMA to all of addressable memory (ZONE_NORMAL). Then we
 	 * carve out the portion of memory that is needed for these devices.
@@ -294,21 +299,21 @@ enum zone_type {
 	ZONE_DMA,
 #endif
 #ifdef CONFIG_ZONE_DMA32
-	/*
+	/**
 	 * x86_64 needs two ZONE_DMAs because it supports devices that are
 	 * only able to do DMA to the lower 16M but also 32 bit devices that
 	 * can only do DMA areas below 4G.
 	 */
 	ZONE_DMA32,
 #endif
-	/*
+	/**
 	 * Normal addressable memory is in ZONE_NORMAL. DMA operations can be
 	 * performed on pages in ZONE_NORMAL if the DMA devices support
 	 * transfers to all addressable memory.
 	 */
 	ZONE_NORMAL,
 #ifdef CONFIG_HIGHMEM
-	/*
+	/**
 	 * A memory area that is only addressable by the kernel through
 	 * mapping portions into its own address space. This is for example
 	 * used by i386 to allow the kernel to address the memory beyond
@@ -318,25 +323,32 @@ enum zone_type {
 	 */
 	ZONE_HIGHMEM,
 #endif
+	/** ??? */
 	ZONE_MOVABLE,
 #ifdef CONFIG_ZONE_DEVICE
+	/** ??? */
 	ZONE_DEVICE,
 #endif
+	/** Max number of zones */
 	__MAX_NR_ZONES
 
 };
 
 #ifndef __GENERATING_BOUNDS_H
 
+/**
+ * Zone descriptor
+ */
 struct zone {
 	/* Read-mostly fields */
 
-	/* zone watermarks, access with *_wmark_pages(zone) macros */
+	/** zone watermarks, access with *_wmark_pages(zone) macros */
 	unsigned long watermark[NR_WMARK];
 
+	/** ??? */
 	unsigned long nr_reserved_highatomic;
 
-	/*
+	/**
 	 * We don't know if the memory that we're going to allocate will be
 	 * freeable or/and it will be released eventually, so to avoid totally
 	 * wasting several GB of ram we must reserve some of the lower zone
@@ -348,41 +360,40 @@ struct zone {
 	long lowmem_reserve[MAX_NR_ZONES];
 
 #ifdef CONFIG_NUMA
-	int node;
+	int node;	/**< ??? */
 #endif
 
-	/*
-	 * The target ratio of ACTIVE_ANON to INACTIVE_ANON pages on
-	 * this zone's LRU.  Maintained by the pageout code.
+	/** The target ratio of ACTIVE_ANON to INACTIVE_ANON pages on
+	 *  this zone's LRU.  Maintained by the pageout code.
 	 */
 	unsigned int inactive_ratio;
 
-	struct pglist_data	*zone_pgdat;
+	struct pglist_data	*zone_pgdat;	/**< Memory node  */
+
+	/** ??? */
 	struct per_cpu_pageset __percpu *pageset;
 
-	/*
-	 * This is a per-zone reserve of pages that should not be
+	/** This is a per-zone reserve of pages that should not be
 	 * considered dirtyable memory.
 	 */
 	unsigned long		dirty_balance_reserve;
 
 #ifndef CONFIG_SPARSEMEM
-	/*
-	 * Flags for a pageblock_nr_pages block. See pageblock-flags.h.
-	 * In SPARSEMEM, this map is stored in struct mem_section
+	/** Flags for a pageblock_nr_pages block. See pageblock-flags.h.
+	 *  In SPARSEMEM, this map is stored in struct mem_section
 	 */
 	unsigned long		*pageblock_flags;
 #endif /* CONFIG_SPARSEMEM */
 
 #ifdef CONFIG_NUMA
-	/*
-	 * zone reclaim becomes active if more unmapped pages exist.
-	 */
+	/** zone reclaim becomes active if more unmapped pages exist. */
 	unsigned long		min_unmapped_pages;
+
+	/** ??? */
 	unsigned long		min_slab_pages;
 #endif /* CONFIG_NUMA */
 
-	/* zone_start_pfn == zone_start_paddr >> PAGE_SHIFT */
+	/** Index of the first page frame of the zone */
 	unsigned long		zone_start_pfn;
 
 	/*
@@ -426,14 +437,20 @@ struct zone {
 	 * adjust_managed_page_count() should be used instead of directly
 	 * touching zone->managed_pages and totalram_pages.
 	 */
+
+	/** ??? */
 	unsigned long		managed_pages;
+
+	/** ??? */
 	unsigned long		spanned_pages;
+
+	/** ??? */
 	unsigned long		present_pages;
 
-	const char		*name;
+	const char		*name;	/**< Zone name */
 
 #ifdef CONFIG_MEMORY_ISOLATION
-	/*
+	/**
 	 * Number of isolated pageblock. It is used to solve incorrect
 	 * freepage counting problem due to racy retrieving migratetype
 	 * of pageblock. Protected by zone->lock.
@@ -442,7 +459,7 @@ struct zone {
 #endif
 
 #ifdef CONFIG_MEMORY_HOTPLUG
-	/* see spanned/present_pages for more description */
+	/** see spanned/present_pages for more description */
 	seqlock_t		span_seqlock;
 #endif
 
@@ -470,32 +487,41 @@ struct zone {
 	 * primary users of these fields, and in mm/page_alloc.c
 	 * free_area_init_core() performs the initialization of them.
 	 */
+
+	/** ??? */
 	wait_queue_head_t	*wait_table;
+
+	/** ??? */
 	unsigned long		wait_table_hash_nr_entries;
+
+	/** ??? */
 	unsigned long		wait_table_bits;
 
 	ZONE_PADDING(_pad1_)
-	/* free areas of different sizes */
+
+	/** free areas of different sizes */
 	struct free_area	free_area[MAX_ORDER];
 
-	/* zone flags, see below */
+	/** zone flags, see below */
 	unsigned long		flags;
 
-	/* Write-intensive fields used from the page allocator */
+	/** Write-intensive fields used from the page allocator */
 	spinlock_t		lock;
 
 	ZONE_PADDING(_pad2_)
 
 	/* Write-intensive fields used by page reclaim */
 
-	/* Fields commonly accessed by the page reclaim scanner */
+	/** Fields commonly accessed by the page reclaim scanner */
 	spinlock_t		lru_lock;
+
+	/** ??? */
 	struct lruvec		lruvec;
 
-	/* Evictions & activations on the inactive file list */
+	/** Evictions & activations on the inactive file list */
 	atomic_long_t		inactive_age;
 
-	/*
+	/**
 	 * When free pages are below this point, additional steps are taken
 	 * when reading the number of free pages to avoid per-cpu counter
 	 * drift allowing watermarks to be breached
@@ -503,31 +529,38 @@ struct zone {
 	unsigned long percpu_drift_mark;
 
 #if defined CONFIG_COMPACTION || defined CONFIG_CMA
-	/* pfn where compaction free scanner should start */
+	/** pfn where compaction free scanner should start */
 	unsigned long		compact_cached_free_pfn;
-	/* pfn where async and sync compaction migration scanner should start */
+
+	/** pfn where async and sync compaction migration scanner should start */
 	unsigned long		compact_cached_migrate_pfn[2];
 #endif
 
 #ifdef CONFIG_COMPACTION
-	/*
+	/**
 	 * On compaction failure, 1<<compact_defer_shift compactions
 	 * are skipped before trying again. The number attempted since
 	 * last failure is tracked with compact_considered.
 	 */
 	unsigned int		compact_considered;
+
+	/** ??? */
 	unsigned int		compact_defer_shift;
+
+	/** ??? */
 	int			compact_order_failed;
 #endif
 
 #if defined CONFIG_COMPACTION || defined CONFIG_CMA
-	/* Set to true when the PG_migrate_skip bits should be cleared */
+	/** Set to true when the PG_migrate_skip bits should be cleared */
 	bool			compact_blockskip_flush;
 #endif
 
 	ZONE_PADDING(_pad3_)
-	/* Zone statistics */
+
+	/** Zone statistics */
 	atomic_long_t		vm_stat[NR_VM_ZONE_STAT_ITEMS];
+
 } ____cacheline_internodealigned_in_smp;
 
 enum zone_flags {
@@ -622,7 +655,9 @@ struct zonelist {
 extern struct page *mem_map;
 #endif
 
-/*
+struct bootmem_data;
+
+/**
  * The pg_data_t structure is used in machines with CONFIG_DISCONTIGMEM
  * (mostly NUMA machines?) to denote a higher-level memory zone than the
  * zone denotes.
@@ -633,22 +668,27 @@ extern struct page *mem_map;
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
  */
-struct bootmem_data;
 typedef struct pglist_data {
+	/** Zone descriptors of the node */
 	struct zone node_zones[MAX_NR_ZONES];
+	/** ??? */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
+	/** Number of zones in the node */
 	int nr_zones;
 #ifdef CONFIG_FLAT_NODE_MEM_MAP	/* means !SPARSEMEM */
+	/** Array of page descriptors of the node */
 	struct page *node_mem_map;
 #ifdef CONFIG_PAGE_EXTENSION
+	/**< ??? */
 	struct page_ext *node_page_ext;
 #endif
 #endif
 #ifndef CONFIG_NO_BOOTMEM
+	/** Used in the kernel initialization phase */
 	struct bootmem_data *bdata;
 #endif
 #ifdef CONFIG_MEMORY_HOTPLUG
-	/*
+	/**
 	 * Must be held any time you expect node_start_pfn, node_present_pages
 	 * or node_spanned_pages stay constant.  Holding this will also
 	 * guarantee that any pfn_valid() stays that way.
@@ -660,30 +700,38 @@ typedef struct pglist_data {
 	 */
 	spinlock_t node_size_lock;
 #endif
+	/** Index of the first page in the node */
 	unsigned long node_start_pfn;
-	unsigned long node_present_pages; /* total number of physical pages */
-	unsigned long node_spanned_pages; /* total size of physical page
-					     range, including holes */
-	int node_id;
+ 	/** total number of physical pages */
+	unsigned long node_present_pages;
+	/** total size of physical page range, including holes */
+	unsigned long node_spanned_pages;
+	int node_id;	/**< Indentifier of the node */
+	/** Wait queue for the kswapd pageout daemon */
 	wait_queue_head_t kswapd_wait;
+	/** ??? */
 	wait_queue_head_t pfmemalloc_wait;
-	struct task_struct *kswapd;	/* Protected by
-					   mem_hotplug_begin/end() */
+	/** 
+	 * Pointer to kswapd kernel thread
+	 * @note Protected by mem_hotplug_begin/end() */
+	struct task_struct *kswapd;
+	/** ??? */
 	int kswapd_max_order;
+	/** ??? */
 	enum zone_type classzone_idx;
 #ifdef CONFIG_NUMA_BALANCING
-	/* Lock serializing the migrate rate limiting window */
+	/** Lock serializing the migrate rate limiting window */
 	spinlock_t numabalancing_migrate_lock;
 
-	/* Rate limiting time interval */
+	/** Rate limiting time interval */
 	unsigned long numabalancing_migrate_next_window;
 
-	/* Number of pages migrated during the rate limiting time interval */
+	/** Number of pages migrated during the rate limiting time interval */
 	unsigned long numabalancing_migrate_nr_pages;
 #endif
 
 #ifdef CONFIG_DEFERRED_STRUCT_PAGE_INIT
-	/*
+	/**
 	 * If memory initialisation on large machines is deferred then this
 	 * is the first PFN that needs to be initialised.
 	 */
