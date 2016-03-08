@@ -1,7 +1,6 @@
-/*
- * Macros for manipulating and testing page->flags
+/**
+ * @file page-flags.h Macros for manipulating and testing page->flags
  */
-
 #ifndef PAGE_FLAGS_H
 #define PAGE_FLAGS_H
 
@@ -72,62 +71,62 @@
  * SPARSEMEM_EXTREME with !SPARSEMEM_VMEMMAP).
  */
 enum pageflags {
-	PG_locked,		/* Page is locked. Don't touch. */
-	PG_error,
-	PG_referenced,
-	PG_uptodate,
-	PG_dirty,
-	PG_lru,
-	PG_active,
-	PG_slab,
-	PG_owner_priv_1,	/* Owner use. If pagecache, fs may use*/
-	PG_arch_1,
-	PG_reserved,
-	PG_private,		/* If pagecache, has fs-private data */
-	PG_private_2,		/* If pagecache, has fs aux data */
-	PG_writeback,		/* Page is under writeback */
-	PG_head,		/* A head page */
-	PG_swapcache,		/* Swap page: swp_entry_t in private */
-	PG_mappedtodisk,	/* Has blocks allocated on-disk */
-	PG_reclaim,		/* To be reclaimed asap */
-	PG_swapbacked,		/* Page is backed by RAM/swap */
-	PG_unevictable,		/* Page is "unevictable"  */
+	PG_locked,		/**< Page is locked, involved in disk I/O operation */
+	PG_error,		/**< An error occurred while transferring the page*/
+	PG_referenced,		/**< The page has recently accessed */
+	PG_uptodate,		/**< Set after correctly completing a read operation */
+	PG_dirty,		/**< The page has been modified */
+	PG_lru,			/**< The page is in active/inactive page list */
+	PG_active,		/**< The page is in active/inactive page list */
+	PG_slab,		/**< The page is included in a slab */
+	PG_owner_priv_1,	/**< Owner use. If pagecache, fs may use*/
+	PG_arch_1,		/**< Not used in 80x86 architecture */
+	PG_reserved,		/**< Page is reserved for kernel or unusable */
+	PG_private,		/**< Page private field is meaningful */
+	PG_private_2,		/**< If pagecache, has fs aux data */
+	PG_writeback,		/**< Page is under writeback */
+	PG_head,		/**< A head page */
+	PG_swapcache,		/**< Page belongs to swap cache */
+	PG_mappedtodisk,	/**< Has blocks allocated on-disk */
+	PG_reclaim,		/**< To be reclaimed asap */
+	PG_swapbacked,		/**< Page is backed by RAM/swap */
+	PG_unevictable,		/**< Page is "unevictable"  */
 #ifdef CONFIG_MMU
-	PG_mlocked,		/* Page is vma mlocked */
+	PG_mlocked,		/**< Page is vma mlocked */
 #endif
 #ifdef CONFIG_ARCH_USES_PG_UNCACHED
-	PG_uncached,		/* Page has been mapped as uncached */
+	PG_uncached,		/**< Page has been mapped as uncached */
 #endif
 #ifdef CONFIG_MEMORY_FAILURE
-	PG_hwpoison,		/* hardware poisoned page. Don't touch */
+	PG_hwpoison,		/**< hardware poisoned page. Don't touch */
 #endif
 #ifdef CONFIG_TRANSPARENT_HUGEPAGE
-	PG_compound_lock,
+	PG_compound_lock,	/**< ???????????????? */
 #endif
 #if defined(CONFIG_IDLE_PAGE_TRACKING) && defined(CONFIG_64BIT)
-	PG_young,
+	PG_young,		/**< ?????????????? */
 	PG_idle,
 #endif
-	__NR_PAGEFLAGS,
+	__NR_PAGEFLAGS,		/**< ?????????????? */
 
 	/* Filesystems */
-	PG_checked = PG_owner_priv_1,
+	PG_checked = PG_owner_priv_1,	/**< ?????? */
 
 	/* Two page bits are conscripted by FS-Cache to maintain local caching
 	 * state.  These bits are set on pages belonging to the netfs's inodes
 	 * when those inodes are being locally cached.
 	 */
-	PG_fscache = PG_private_2,	/* page backed by cache */
+	PG_fscache = PG_private_2,	/**< page backed by cache */
 
 	/* XEN */
-	/* Pinned in Xen as a read-only pagetable page. */
+	/** Pinned in Xen as a read-only pagetable page. */
 	PG_pinned = PG_owner_priv_1,
-	/* Pinned as part of domain save (see xen_mm_pin_all()). */
+	/** Pinned as part of domain save (see xen_mm_pin_all()). */
 	PG_savepinned = PG_dirty,
-	/* Has a grant mapping of another (foreign) domain's page. */
+	/** Has a grant mapping of another (foreign) domain's page. */
 	PG_foreign = PG_owner_priv_1,
 
-	/* SLOB */
+	/** SLOB */
 	PG_slob_free = PG_private,
 };
 

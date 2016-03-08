@@ -1,3 +1,6 @@
+/**
+ * @file mm_types.h type define for memory allocation
+ */
 #ifndef _LINUX_MM_TYPES_H
 #define _LINUX_MM_TYPES_H
 
@@ -28,7 +31,8 @@ struct mem_cgroup;
 		IS_ENABLED(CONFIG_ARCH_ENABLE_SPLIT_PMD_PTLOCK))
 #define ALLOC_SPLIT_PTLOCKS	(SPINLOCK_SIZE > BITS_PER_LONG/8)
 
-/*
+/**
+ * @brief Page Descriptor
  * Each physical page in the system has a struct page associated with
  * it to keep track of whatever it is we are using the page for at the
  * moment. Note that we have no way to track which tasks are using
@@ -43,33 +47,33 @@ struct mem_cgroup;
  */
 struct page {
 	/* First double word block */
-	unsigned long flags;		/* Atomic flags, some possibly
-					 * updated asynchronously */
+	unsigned long flags;	/**< Atomic flags, also encodes the zone number */
 	union {
-		struct address_space *mapping;	/* If low bit clear, points to
-						 * inode address_space, or NULL.
-						 * If page mapped as anonymous
-						 * memory, low bit is set, and
-						 * it points to anon_vma object:
-						 * see PAGE_MAPPING_ANON below.
-						 */
-		void *s_mem;			/* slab first object */
+		/**
+		 * Used when page is inserted into the page cache, or 
+		 * belongs to anonymous regin.
+		 * If low bit clear, points to inode address_space, or NULL.
+		 * If page mapped as anonymous memory, low bit is set, and
+		 * it points to anon_vma object: see PAGE_MAPPING_ANON below.
+		 */
+  		struct address_space *mapping;
+		void *s_mem;	/**< slab first object */
 	};
 
 	/* Second double word */
 	struct {
 		union {
-			pgoff_t index;		/* Our offset within mapping. */
-			void *freelist;		/* sl[aou]b first free object */
+			pgoff_t index;		/**< Our offset within mapping. */
+			void *freelist;		/**< sl[aou]b first free object */
 		};
 
 		union {
 #if defined(CONFIG_HAVE_CMPXCHG_DOUBLE) && \
 	defined(CONFIG_HAVE_ALIGNED_STRUCT_PAGE)
-			/* Used for cmpxchg_double in slub */
+			/** Used for cmpxchg_double in slub */
 			unsigned long counters;
 #else
-			/*
+			/**
 			 * Keep _count separate from slub cmpxchg_double data.
 			 * As the rest of the double word is protected by
 			 * slab_lock but _count is not.
@@ -80,7 +84,7 @@ struct page {
 			struct {
 
 				union {
-					/*
+					/**
 					 * Count of ptes mapped in
 					 * mms, to show when page is
 					 * mapped & limit reverse map
@@ -99,15 +103,21 @@ struct page {
 					atomic_t _mapcount;
 
 					struct { /* SLUB */
+						/** unknown */
 						unsigned inuse:16;
+						/** unknown */
 						unsigned objects:15;
+						/** unknown */
 						unsigned frozen:1;
 					};
-					int units;	/* SLOB */
+					/** unknown */
+					int units;
 				};
-				atomic_t _count;		/* Usage count, see below. */
+				/** Page frame's reference counter */
+				atomic_t _count;
 			};
-			unsigned int active;	/* SLAB */
+			/** unknown */
+			unsigned int active;
 		};
 	};
 
@@ -119,28 +129,29 @@ struct page {
 	 * avoid collision and false-positive PageTail().
 	 */
 	union {
-		struct list_head lru;	/* Pageout list, eg. active_list
-					 * protected by zone->lru_lock !
-					 * Can be used as a generic list
-					 * by the page owner.
-					 */
-		struct {		/* slub per cpu partial pages */
-			struct page *next;	/* Next partial slab */
+		/** Pageout list, eg. active_list protected by zone->lru_lock !
+		 * Can be used as a generic list by the page owner.
+		 */
+		struct list_head lru;
+
+		/** slub per cpu partial pages */
+		struct {		
+			struct page *next;	/**< Next partial slab */
 #ifdef CONFIG_64BIT
-			int pages;	/* Nr of partial slabs left */
-			int pobjects;	/* Approximate # of objects */
+			int pages;	/**< Nr of partial slabs left */
+			int pobjects;	/**< Approximate # of objects */
 #else
-			short int pages;
-			short int pobjects;
+			short int pages;	/**< unknown */
+			short int pobjects;	/**< unknown */
 #endif
 		};
 
-		struct rcu_head rcu_head;	/* Used by SLAB
-						 * when destroying via RCU
-						 */
-		/* Tail pages of compound page */
+			/** Used by SLAB when destroying via RCU */
+			struct rcu_head rcu_head;
+
+			/* Tail pages of compound page */
 		struct {
-			unsigned long compound_head; /* If bit zero is set */
+			unsigned long compound_head; /**< If bit zero is set */
 
 			/* First tail page only */
 #ifdef CONFIG_64BIT
@@ -150,45 +161,45 @@ struct page {
 			 * unsigned int. It can help compiler generate better or
 			 * smaller code on some archtectures.
 			 */
-			unsigned int compound_dtor;
-			unsigned int compound_order;
+			unsigned int compound_dtor;	/**< unknown */
+			unsigned int compound_order;	/**< unknown */
 #else
-			unsigned short int compound_dtor;
-			unsigned short int compound_order;
+			unsigned short int compound_dtor;	/**< unknown */
+			unsigned short int compound_order;	/**< unknown */
 #endif
 		};
 
 #if defined(CONFIG_TRANSPARENT_HUGEPAGE) && USE_SPLIT_PMD_PTLOCKS
 		struct {
-			unsigned long __pad;	/* do not overlay pmd_huge_pte
-						 * with compound_head to avoid
-						 * possible bit 0 collision.
-						 */
-			pgtable_t pmd_huge_pte; /* protected by page->ptl */
+			/** do not overlay pmd_huge_pte
+			 * with compound_head to avoid possible bit 0 collision.
+			 */
+			unsigned long __pad;
+			pgtable_t pmd_huge_pte; /**< protected by page->ptl */
 		};
 #endif
 	};
 
 	/* Remainder is not double word aligned */
 	union {
-		unsigned long private;		/* Mapping-private opaque data:
-					 	 * usually used for buffer_heads
-						 * if PagePrivate set; used for
-						 * swp_entry_t if PageSwapCache;
-						 * indicates order in the buddy
-						 * system if PG_buddy is set.
-						 */
+		/** Mapping-private opaque data:  usually used for buffer_heads
+		 * if PagePrivate set; used for swp_entry_t if PageSwapCache;
+		 * indicates order in the buddy system if PG_buddy is set.
+		 */
+		unsigned long private;
+
 #if USE_SPLIT_PTE_PTLOCKS
 #if ALLOC_SPLIT_PTLOCKS
-		spinlock_t *ptl;
+		spinlock_t *ptl;	/**< unknown */
 #else
-		spinlock_t ptl;
+		spinlock_t ptl;		/**< unknown */
 #endif
 #endif
-		struct kmem_cache *slab_cache;	/* SL[AU]B: Pointer to slab */
+		struct kmem_cache *slab_cache;	/**< SL[AU]B: Pointer to slab */
 	};
 
 #ifdef CONFIG_MEMCG
+	/** unknown */
 	struct mem_cgroup *mem_cgroup;
 #endif
 
@@ -203,22 +214,28 @@ struct page {
 	 * WANT_PAGE_VIRTUAL in asm/page.h
 	 */
 #if defined(WANT_PAGE_VIRTUAL)
-	void *virtual;			/* Kernel virtual address (NULL if
-					   not kmapped, ie. highmem) */
+	/** Kernel virtual address (NULL ifnot kmapped, ie. highmem) */
+	void *virtual;
+					   
 #endif /* WANT_PAGE_VIRTUAL */
 
 #ifdef CONFIG_KMEMCHECK
-	/*
+	/**
 	 * kmemcheck wants to track the status of each byte in a page; this
 	 * is a pointer to such a status block. NULL if not tracked.
+	 * @note exists only while  CONFIG_KMEMCHECK defined
 	 */
 	void *shadow;
 #endif
 
 #ifdef LAST_CPUPID_NOT_IN_PAGE_FLAGS
+	/** 
+	 * @note exists while LAST_CPUPID_NOT_IN_PAGE_FLAGS defined
+	 */
 	int _last_cpupid;
 #endif
 }
+
 /*
  * The struct page can be forced to be double word aligned so that atomic ops
  * on double words work. The SLUB allocator can make use of such a feature.
